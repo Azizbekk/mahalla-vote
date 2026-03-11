@@ -1,56 +1,46 @@
-import type { BvToast } from 'bootstrap-vue';
-import { getCurrentInstance } from 'vue';
+import { Notify } from 'quasar';
 import { type Composer, useI18n } from 'vue-i18n';
 
 export const useAlertService = () => {
-  const bvToast = getCurrentInstance().root.proxy._bv__toast;
-  if (!bvToast) {
-    throw new Error('BootstrapVue toast component was not found');
-  }
   const i18n = useI18n();
-  return new AlertService({
-    bvToast,
-    i18n,
-  });
+  return new AlertService({ i18n });
 };
 
 export default class AlertService {
-  private bvToast: BvToast;
   private i18n: Composer;
 
-  constructor({ bvToast, i18n }: { bvToast: BvToast; i18n: Composer }) {
-    this.bvToast = bvToast;
+  constructor({ i18n }: { i18n: Composer }) {
     this.i18n = i18n;
   }
 
-  showInfo(toastMessage: string, toastOptions?: any) {
-    this.bvToast.toast(toastMessage, {
-      toaster: 'b-toaster-top-center',
-      title: 'Info',
-      variant: 'info',
-      solid: true,
-      autoHideDelay: 5000,
-      ...toastOptions,
+  showInfo(message: string, options?: any) {
+    Notify.create({
+      message,
+      type: 'info',
+      position: 'top',
+      timeout: 5000,
+      icon: 'info',
+      ...options,
     });
   }
 
-  showSuccess(toastMessage: string) {
-    this.bvToast.toast(toastMessage, {
-      toaster: 'b-toaster-top-center',
-      title: 'Success',
-      variant: 'success',
-      solid: true,
-      autoHideDelay: 5000,
+  showSuccess(message: string) {
+    Notify.create({
+      message,
+      type: 'positive',
+      position: 'top',
+      timeout: 5000,
+      icon: 'check_circle',
     });
   }
 
-  showError(toastMessage: string) {
-    this.bvToast.toast(toastMessage, {
-      toaster: 'b-toaster-top-center',
-      title: 'Error',
-      variant: 'danger',
-      solid: true,
-      autoHideDelay: 5000,
+  showError(message: string) {
+    Notify.create({
+      message,
+      type: 'negative',
+      position: 'top',
+      timeout: 5000,
+      icon: 'error',
     });
   }
 

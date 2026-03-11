@@ -12,7 +12,6 @@ pluginManagement {
         }
     }
     plugins {
-        id 'com.gorylenko.gradle-git-properties' version "${gitPropertiesPluginVersion}"
         id "org.liquibase.gradle" version "${liquibasePluginVersion}"
         // jhipster-needle-gradle-plugin-management-plugins - JHipster will add additional entries here
     }

@@ -21,16 +21,18 @@ liquibase {
   activities {
     main {
       driver "org.postgresql.Driver"
-      url "jdbc:postgresql://localhost:5432/mahallaVote"
-      username "mahallaVote"
+      url "jdbc:postgresql://10.10.10.215:5432/vote_db"
+      username "vote_u"
+      password "vote_123"
       changelogFile "src/main/resources/config/liquibase/master.xml"
       logLevel "debug"
       classpath "src/main/resources/"
     }
     diffLog {
       driver "org.postgresql.Driver"
-      url "jdbc:postgresql://localhost:5432/mahallaVote"
-      username "mahallaVote"
+      url "jdbc:postgresql://10.10.10.215:5432/vote_db"
+      username "vote_u"
+      password "vote_123"
       changelogFile project.ext.diffChangelogFile
       referenceUrl "hibernate:spring:com.azyu.mahallavote.domain?dialect=org.hibernate.dialect.PostgreSQLDialect&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
       logLevel "debug"

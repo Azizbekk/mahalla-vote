@@ -1,68 +1,81 @@
 <template>
-  <div>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <h1 v-text="t$('reset.request.title')"></h1>
+  <div class="auth-page">
+    <q-card class="auth-card" flat bordered style="max-width: 480px; margin: 0 auto">
+      <q-card-section class="text-center q-pt-lg">
+        <q-icon name="mark_email_read" size="48px" color="primary" />
+        <div class="text-h5 q-mt-sm text-weight-bold">{{ t$('reset.request.title') }}</div>
+      </q-card-section>
 
-        <div class="alert alert-warning" v-if="!success">
-          <p v-text="t$('reset.request.messages.info')"></p>
-        </div>
+      <q-card-section>
+        <q-banner v-if="!success" class="bg-warning text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="info" color="white" />
+          </template>
+          {{ t$('reset.request.messages.info') }}
+        </q-banner>
 
-        <div class="alert alert-success" v-if="success">
-          <p v-text="t$('reset.request.messages.success')"></p>
-        </div>
+        <q-banner v-if="success" class="bg-positive text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="check_circle" color="white" />
+          </template>
+          {{ t$('reset.request.messages.success') }}
+        </q-banner>
 
-        <form v-if="!success" name="form" @submit.prevent="requestReset()">
-          <div class="form-group">
-            <label class="form-control-label" for="email" v-text="t$('global.form[\'email.label\']')"></label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              :placeholder="t$('global.form[\'email.placeholder\']')"
-              :class="{ valid: !v$.resetAccount.email.$invalid, invalid: v$.resetAccount.email.$invalid }"
-              v-model="v$.resetAccount.email.$model"
-              minlength="5"
-              maxlength="254"
-              email
-              required
-              data-cy="emailResetPassword"
-            />
-            <div v-if="v$.resetAccount.email.$anyDirty && v$.resetAccount.email.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetAccount.email.required"
-                v-text="t$('global.messages.validate.email.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetAccount.email.email"
-                v-text="t$('global.messages.validate.email.invalid')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetAccount.email.minLength"
-                v-text="t$('global.messages.validate.email.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetAccount.email.maxLength"
-                v-text="t$('global.messages.validate.email.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <button
-            type="submit"
-            :disabled="v$.resetAccount.$invalid"
-            class="btn btn-primary"
-            v-text="t$('reset.request.form.button')"
-            data-cy="submit"
-          ></button>
-        </form>
-      </div>
-    </div>
+        <q-form v-if="!success" @submit.prevent="requestReset" class="q-gutter-md">
+          <q-input
+            v-model="resetAccount.email"
+            :label="t$('global.form.emailLabel')"
+            :placeholder="t$('global.form.emailPlaceholder')"
+            type="email"
+            outlined
+            dense
+            lazy-rules
+            data-cy="emailResetPassword"
+            :rules="[
+              val => !!val || t$('validate.email.required'),
+              val => (val && val.length >= 5) || t$('validate.email.minlength'),
+              val => (val && val.length <= 254) || t$('validate.email.maxlength'),
+              val => /.+@.+\..+/.test(val) || t$('validate.email.invalid'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
+
+          <q-btn type="submit" color="primary" unelevated class="full-width" :label="t$('reset.request.form.button')" data-cy="submit" />
+        </q-form>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
-<script lang="ts" src="./reset-password-init.component.ts"></script>
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import axios from 'axios';
+
+const { t: t$ } = useI18n();
+
+const error = ref(false);
+const success = ref(false);
+const resetAccount = ref({
+  email: '',
+});
+
+const requestReset = async () => {
+  error.value = false;
+  success.value = false;
+  try {
+    await axios.post('api/account/reset-password/init', resetAccount.value.email, {
+      headers: {
+        'content-type': 'text/plain',
+      },
+    });
+    success.value = true;
+  } catch {
+    success.value = false;
+    error.value = true;
+  }
+};
+</script>

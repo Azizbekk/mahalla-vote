@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-01-1" author="mahallavote">
+        <createSequence sequenceName="seq_app_telegram_user" startValue="1050" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-01-2" author="mahallavote">
+        <createTable tableName="app_telegram_user">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_app_telegram_user">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints unique="true" uniqueConstraintName="ux_app_telegram_user_user_id"/>
+            </column>
+            <column name="chat_id" type="bigint">
+                <constraints unique="true" uniqueConstraintName="ux_app_telegram_user_chat_id"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints unique="true" uniqueConstraintName="ux_app_telegram_user_username"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="phone_number" type="varchar(50)"/>
+            <column name="language_code" type="varchar(10)"/>
+            <column name="state" type="varchar(30)" defaultValue="HOME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

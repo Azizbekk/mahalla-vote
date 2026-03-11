@@ -32,9 +32,9 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/mahallaVote
-    username: mahallaVote
-    password:
+    url: jdbc:postgresql://10.10.10.215:5432/vote_db
+    username: vote_u
+    password: vote_123
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -100,4 +100,6 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  liquibase:
+    async-start: false

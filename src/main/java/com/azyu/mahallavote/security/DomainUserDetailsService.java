@@ -1,7 +1,7 @@
 package com.azyu.mahallavote.security;
 
+import com.azyu.mahallavote.domain.AppUser;
 import com.azyu.mahallavote.domain.Authority;
-import com.azyu.mahallavote.domain.User;
 import com.azyu.mahallavote.repository.UserRepository;
 import java.util.*;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
@@ -48,7 +48,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             .orElseThrow(() -> new UsernameNotFoundException("User " + lowercaseLogin + " was not found in the database"));
     }
 
-    private org.springframework.security.core.userdetails.User createSpringSecurityUser(String lowercaseLogin, User user) {
+    private org.springframework.security.core.userdetails.User createSpringSecurityUser(String lowercaseLogin, AppUser user) {
         if (!user.isActivated()) {
             throw new UserNotActivatedException("User " + lowercaseLogin + " was not activated");
         }
@@ -78,7 +78,7 @@ public class DomainUserDetailsService implements UserDetailsService {
             return super.hashCode();
         }
 
-        public static UserWithId fromUser(User user) {
+        public static UserWithId fromUser(AppUser user) {
             return new UserWithId(
                 user.getLogin(),
                 user.getPassword(),

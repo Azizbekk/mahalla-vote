@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-02-1" author="mahallavote">
+        <createSequence sequenceName="seq_app_amount_config" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-02-2" author="mahallavote">
+        <createTable tableName="app_amount_config">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_app_amount_config">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="type" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)"/>
+            <column name="status" type="varchar(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250311-02-3" author="mahallavote" context="faker">
+        <insert tableName="app_amount_config">
+            <column name="type" value="VOTE"/>
+            <column name="amount" valueNumeric="5000"/>
+            <column name="description" value="Ovoz berish uchun mukofot (so'm)"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="app_amount_config">
+            <column name="type" value="REFERRAL_VOTE"/>
+            <column name="amount" valueNumeric="3000"/>
+            <column name="description" value="Referal ovoz uchun mukofot (so'm)"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+        <insert tableName="app_amount_config">
+            <column name="type" value="WITHDRAW_LIMIT"/>
+            <column name="amount" valueNumeric="50000"/>
+            <column name="description" value="Minimal yechib olish summasi (so'm)"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

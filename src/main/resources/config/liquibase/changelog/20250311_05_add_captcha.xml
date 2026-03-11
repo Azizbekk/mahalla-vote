@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-05-1" author="mahallavote">
+        <createSequence sequenceName="seq_app_captcha" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-05-2" author="mahallavote">
+        <createTable tableName="app_captcha">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_app_captcha">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="a_image_hash" type="varchar(500)"/>
+            <column name="b_image_hash" type="varchar(500)"/>
+            <column name="x" type="bigint"/>
+            <column name="y" type="bigint"/>
+            <column name="created_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -46,7 +46,7 @@ export default class AccountService {
     if (this.store.logon) {
       return this.store.logon;
     }
-    const token = localStorage.getItem('jhi-authenticationToken') || sessionStorage.getItem('jhi-authenticationToken');
+    const token = localStorage.getItem('authenticationToken') || sessionStorage.getItem('authenticationToken');
     if (this.authenticated && this.userAuthorities && token) {
       return;
     }

@@ -2,6 +2,7 @@ import { URL, fileURLToPath } from 'node:url';
 import { defineConfig, normalizePath } from 'vite';
 
 import vue from '@vitejs/plugin-vue';
+import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 const { getAbsoluteFSPath } = await import('swagger-ui-dist');
@@ -10,7 +11,8 @@ const swaggerUiPath = getAbsoluteFSPath();
 // eslint-disable-next-line prefer-const
 let config = defineConfig({
   plugins: [
-    vue(),
+    vue({ template: { transformAssetUrls } }),
+    quasar({ sassVariables: fileURLToPath(new URL('./src/main/webapp/content/scss/quasar-variables.scss', import.meta.url)) }),
     viteStaticCopy({
       targets: [
         {
@@ -39,7 +41,6 @@ let config = defineConfig({
   },
   resolve: {
     alias: {
-      vue: '@vue/compat/dist/vue.esm-bundler.js',
       '@': fileURLToPath(new URL('./src/main/webapp/app/', import.meta.url)),
       '@content': fileURLToPath(new URL('./src/main/webapp/content/', import.meta.url)),
     },
@@ -62,7 +63,5 @@ let config = defineConfig({
     ),
   },
 });
-
-// jhipster-needle-add-vite-config - JHipster will add custom config
 
 export default config;

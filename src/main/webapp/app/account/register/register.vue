@@ -1,188 +1,198 @@
 <template>
-  <div>
-    <div class="row justify-content-center">
-      <div class="col-md-8 toastify-container">
-        <h1 v-text="t$('register.title')" id="register-title" data-cy="registerTitle"></h1>
-
-        <div class="alert alert-success" role="alert" v-if="success" v-html="t$('register.messages.success')"></div>
-
-        <div class="alert alert-danger" role="alert" v-if="error" v-html="t$('register.messages.error.fail')"></div>
-
-        <div class="alert alert-danger" role="alert" v-if="errorUserExists" v-html="t$('register.messages.error.userexists')"></div>
-
-        <div class="alert alert-danger" role="alert" v-if="errorEmailExists" v-html="t$('register.messages.error.emailexists')"></div>
-      </div>
-    </div>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <form id="register-form" name="registerForm" @submit.prevent="register()" v-if="!success" no-validate>
-          <div class="form-group">
-            <label class="form-control-label" for="username" v-text="t$('global.form[\'username.label\']')"></label>
-            <input
-              type="text"
-              class="form-control"
-              v-model="v$.registerAccount.login.$model"
-              id="username"
-              name="login"
-              :class="{ valid: !v$.registerAccount.login.$invalid, invalid: v$.registerAccount.login.$invalid }"
-              required
-              minlength="1"
-              maxlength="50"
-              pattern="^[a-zA-Z0-9!#$&'*+=?^_`{|}~.-]+@?[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
-              :placeholder="t$('global.form[\'username.placeholder\']')"
-              data-cy="username"
-            />
-            <div v-if="v$.registerAccount.login.$anyDirty && v$.registerAccount.login.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.login.required"
-                v-text="t$('register.messages.validate.login.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.login.minLength"
-                v-text="t$('register.messages.validate.login.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.login.maxLength"
-                v-text="t$('register.messages.validate.login.maxlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.login.pattern"
-                v-text="t$('register.messages.validate.login.pattern')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="email" v-text="t$('global.form[\'email.label\']')"></label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              :class="{ valid: !v$.registerAccount.email.$invalid, invalid: v$.registerAccount.email.$invalid }"
-              v-model="v$.registerAccount.email.$model"
-              minlength="5"
-              maxlength="254"
-              email
-              required
-              :placeholder="t$('global.form[\'email.placeholder\']')"
-              data-cy="email"
-            />
-            <div v-if="v$.registerAccount.email.$anyDirty && v$.registerAccount.email.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.email.required"
-                v-text="t$('global.messages.validate.email.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.email.email"
-                v-text="t$('global.messages.validate.email.invalid')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.email.minLength"
-                v-text="t$('global.messages.validate.email.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.email.maxLength"
-                v-text="t$('global.messages.validate.email.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="firstPassword" v-text="t$('global.form[\'newpassword.label\']')"></label>
-            <input
-              type="password"
-              class="form-control"
-              id="firstPassword"
-              name="password"
-              :class="{ valid: !v$.registerAccount.password.$invalid, invalid: v$.registerAccount.password.$invalid }"
-              v-model="v$.registerAccount.password.$model"
-              minlength="4"
-              maxlength="50"
-              required
-              :placeholder="t$('global.form[\'newpassword.placeholder\']')"
-              data-cy="firstPassword"
-            />
-            <div v-if="v$.registerAccount.password.$anyDirty && v$.registerAccount.password.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.password.required"
-                v-text="t$('global.messages.validate.newpassword.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.password.minLength"
-                v-text="t$('global.messages.validate.newpassword.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.registerAccount.password.maxLength"
-                v-text="t$('global.messages.validate.newpassword.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="secondPassword" v-text="t$('global.form[\'confirmpassword.label\']')"></label>
-            <input
-              type="password"
-              class="form-control"
-              id="secondPassword"
-              name="confirmPasswordInput"
-              :class="{ valid: !v$.confirmPassword.$invalid, invalid: v$.confirmPassword.$invalid }"
-              v-model="v$.confirmPassword.$model"
-              minlength="4"
-              maxlength="50"
-              required
-              :placeholder="t$('global.form[\'confirmpassword.placeholder\']')"
-              data-cy="secondPassword"
-            />
-            <div v-if="v$.confirmPassword.$dirty && v$.confirmPassword.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.confirmPassword.required"
-                v-text="t$('global.messages.validate.confirmpassword.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.confirmPassword.minLength"
-                v-text="t$('global.messages.validate.confirmpassword.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.confirmPassword.maxLength"
-                v-text="t$('global.messages.validate.confirmpassword.maxlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.confirmPassword.sameAsPassword"
-                v-text="t$('global.messages.error.dontmatch')"
-              ></small>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="v$.$invalid"
-            class="btn btn-primary"
-            v-text="t$('register.form.button')"
-            data-cy="submit"
-          ></button>
-        </form>
-        <p></p>
-        <div class="alert alert-warning">
-          <span v-text="t$('global.messages.info.authenticated.prefix')"></span>
-          <a class="alert-link" @click="showLogin()" v-text="t$('global.messages.info.authenticated.link')"></a
-          ><span v-html="t$('global.messages.info.authenticated.suffix')"></span>
+  <div class="auth-page">
+    <q-card class="auth-card" flat bordered style="max-width: 500px; margin: 0 auto">
+      <q-card-section class="text-center q-pt-lg">
+        <q-icon name="person_add" size="48px" color="primary" />
+        <div class="text-h5 q-mt-sm text-weight-bold" id="register-title" data-cy="registerTitle">
+          {{ t$('register.title') }}
         </div>
-      </div>
-    </div>
+      </q-card-section>
+
+      <q-card-section>
+        <q-banner v-if="success" class="bg-positive text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="check_circle" color="white" />
+          </template>
+          <span v-html="t$('register.messages.success')"></span>
+        </q-banner>
+
+        <q-banner v-if="error" class="bg-negative text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          <span v-html="t$('register.messages.error.fail')"></span>
+        </q-banner>
+
+        <q-banner v-if="errorUserExists" class="bg-negative text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          <span v-html="t$('register.messages.error.userexists')"></span>
+        </q-banner>
+
+        <q-banner v-if="errorEmailExists" class="bg-negative text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          <span v-html="t$('register.messages.error.emailexists')"></span>
+        </q-banner>
+
+        <q-form v-if="!success" @submit.prevent="register" class="q-gutter-md" id="register-form">
+          <q-input
+            v-model="registerAccount.login"
+            :label="t$('global.form.usernameLabel')"
+            :placeholder="t$('global.form.usernamePlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="username"
+            :rules="[
+              val => !!val || t$('register.messages.validate.login.required'),
+              val => (val && val.length >= 1) || t$('register.messages.validate.login.minlength'),
+              val => (val && val.length <= 50) || t$('register.messages.validate.login.maxlength'),
+              val => loginPattern.test(val) || t$('register.messages.validate.login.pattern'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="person" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="registerAccount.email"
+            :label="t$('global.form.emailLabel')"
+            :placeholder="t$('global.form.emailPlaceholder')"
+            type="email"
+            outlined
+            dense
+            lazy-rules
+            data-cy="email"
+            :rules="[
+              val => !!val || t$('validate.email.required'),
+              val => (val && val.length >= 5) || t$('validate.email.minlength'),
+              val => (val && val.length <= 254) || t$('validate.email.maxlength'),
+              val => /.+@.+\..+/.test(val) || t$('validate.email.invalid'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="registerAccount.password"
+            :type="showPassword ? 'text' : 'password'"
+            :label="t$('global.form.newPasswordLabel')"
+            :placeholder="t$('global.form.newPasswordPlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="firstPassword"
+            :rules="[
+              val => !!val || t$('validate.newpassword.required'),
+              val => (val && val.length >= 4) || t$('validate.newpassword.minlength'),
+              val => (val && val.length <= 50) || t$('validate.newpassword.maxlength'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="lock" />
+            </template>
+            <template #append>
+              <q-icon :name="showPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPassword = !showPassword" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="confirmPassword"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            :label="t$('global.form.confirmPasswordLabel')"
+            :placeholder="t$('global.form.confirmPasswordPlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="secondPassword"
+            :rules="[
+              val => !!val || t$('validate.confirmpassword.required'),
+              val => (val && val.length >= 4) || t$('validate.confirmpassword.minlength'),
+              val => (val && val.length <= 50) || t$('validate.confirmpassword.maxlength'),
+              val => val === registerAccount.password || t$('global.messages.error.dontmatch'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="lock_outline" />
+            </template>
+            <template #append>
+              <q-icon
+                :name="showConfirmPassword ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer"
+                @click="showConfirmPassword = !showConfirmPassword"
+              />
+            </template>
+          </q-input>
+
+          <q-btn type="submit" color="primary" unelevated class="full-width" :label="t$('register.form.button')" data-cy="submit" />
+        </q-form>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section class="text-center">
+        <span>{{ t$('global.messages.info.authenticated.prefix') }}</span>
+        <a class="text-primary cursor-pointer" @click="showLogin()">{{ t$('global.messages.info.authenticated.link') }}</a>
+        <span v-html="t$('global.messages.info.authenticated.suffix')"></span>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
-<script lang="ts" src="./register.component.ts"></script>
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useLoginModal } from '@/account/login-modal';
+import RegisterService from '@/account/register/register.service';
+import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from '@/constants';
+
+const { t: t$ } = useI18n();
+const { showLogin } = useLoginModal();
+const registerService = inject('registerService', () => new RegisterService(), true);
+const currentLanguage = inject('currentLanguage', () => computed(() => navigator.language ?? 'uz-Latn-uz'), true);
+
+const loginPattern = /^[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$|^[_.@A-Za-z0-9-]+$/;
+
+const error = ref(false);
+const errorEmailExists = ref(false);
+const errorUserExists = ref(false);
+const success = ref(false);
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+
+const confirmPassword = ref('');
+const registerAccount = ref({
+  login: '',
+  email: '',
+  password: '',
+});
+
+const register = async () => {
+  error.value = false;
+  errorUserExists.value = false;
+  errorEmailExists.value = false;
+
+  try {
+    await registerService.processRegistration({
+      ...registerAccount.value,
+      langKey: currentLanguage.value,
+    });
+    success.value = true;
+  } catch (err: any) {
+    success.value = false;
+    if (err.response?.status === 400 && err.response?.data?.type === LOGIN_ALREADY_USED_TYPE) {
+      errorUserExists.value = true;
+    } else if (err.response?.status === 400 && err.response?.data?.type === EMAIL_ALREADY_USED_TYPE) {
+      errorEmailExists.value = true;
+    } else {
+      error.value = true;
+    }
+  }
+};
+</script>

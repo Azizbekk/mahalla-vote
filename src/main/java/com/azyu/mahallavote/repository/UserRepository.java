@@ -1,7 +1,7 @@
 package com.azyu.mahallavote.repository;
 
-import com.azyu.mahallavote.domain.User;
-import java.time.Instant;
+import com.azyu.mahallavote.domain.AppUser;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.*;
@@ -10,21 +10,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Spring Data JPA repository for the {@link User} entity.
+ * Spring Data JPA repository for the {@link AppUser} entity.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findOneByActivationKey(String activationKey);
-    List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
-    Optional<User> findOneByResetKey(String resetKey);
-    Optional<User> findOneByEmailIgnoreCase(String email);
-    Optional<User> findOneByLogin(String login);
+public interface UserRepository extends JpaRepository<AppUser, Long> {
+    Optional<AppUser> findOneByActivationKey(String activationKey);
+    List<AppUser> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(LocalDateTime dateTime);
+    Optional<AppUser> findOneByResetKey(String resetKey);
+    Optional<AppUser> findOneByEmailIgnoreCase(String email);
+    Optional<AppUser> findOneByLogin(String login);
 
     @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesByLogin(String login);
+    Optional<AppUser> findOneWithAuthoritiesByLogin(String login);
 
     @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesByEmailIgnoreCase(String email);
+    Optional<AppUser> findOneWithAuthoritiesByEmailIgnoreCase(String email);
 
-    Page<User> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
+    Page<AppUser> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
 }

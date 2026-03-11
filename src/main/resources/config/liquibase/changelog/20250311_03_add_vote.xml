@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-03-1" author="mahallavote">
+        <createSequence sequenceName="seq_app_vote" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-03-2" author="mahallavote">
+        <createTable tableName="app_vote">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_app_vote">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="voter_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voted_at" type="timestamp"/>
+            <column name="paid_at" type="timestamp"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="app_vote" baseColumnNames="voter_id"
+                                 referencedTableName="app_telegram_user" referencedColumnNames="id"
+                                 constraintName="fk_app_vote_voter"/>
+    </changeSet>
+
+</databaseChangeLog>

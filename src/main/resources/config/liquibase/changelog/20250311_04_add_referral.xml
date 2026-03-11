@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-04-1" author="mahallavote">
+        <createSequence sequenceName="seq_app_referral" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-04-2" author="mahallavote">
+        <createTable tableName="app_referral">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_app_referral">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="referrer_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="referred_id" type="bigint">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_app_referral_referred_id"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="REGISTERED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="${datetimeType}" defaultValueComputed="current_timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voted_at" type="timestamp"/>
+            <column name="paid_at" type="timestamp"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="app_referral" baseColumnNames="referrer_id"
+                                 referencedTableName="app_telegram_user" referencedColumnNames="id"
+                                 constraintName="fk_app_referral_referrer"/>
+        <addForeignKeyConstraint baseTableName="app_referral" baseColumnNames="referred_id"
+                                 referencedTableName="app_telegram_user" referencedColumnNames="id"
+                                 constraintName="fk_app_referral_referred"/>
+    </changeSet>
+
+</databaseChangeLog>

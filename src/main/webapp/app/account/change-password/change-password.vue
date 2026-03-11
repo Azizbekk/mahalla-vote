@@ -1,106 +1,177 @@
 <template>
-  <div>
-    <div class="row justify-content-center">
-      <div class="col-md-8 toastify-container">
-        <h2 v-if="username" id="password-title">
+  <div class="auth-page">
+    <q-card class="auth-card" flat bordered style="max-width: 500px; margin: 0 auto">
+      <q-card-section class="text-center q-pt-lg">
+        <q-icon name="vpn_key" size="48px" color="primary" />
+        <div v-if="username" class="text-h5 q-mt-sm text-weight-bold" id="password-title">
           <span v-html="t$('password.title', { username })"></span>
-        </h2>
+        </div>
+      </q-card-section>
 
-        <div class="alert alert-success" role="alert" v-if="success" v-html="t$('password.messages.success')"></div>
-        <div class="alert alert-danger" role="alert" v-if="error" v-html="t$('password.messages.error')"></div>
+      <q-card-section>
+        <q-banner v-if="success" class="bg-positive text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="check_circle" color="white" />
+          </template>
+          <span v-html="t$('password.messages.success')"></span>
+        </q-banner>
 
-        <div class="alert alert-danger" role="alert" v-if="doNotMatch" v-text="t$('global.messages.error.dontmatch')"></div>
+        <q-banner v-if="error" class="bg-negative text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          <span v-html="t$('password.messages.error')"></span>
+        </q-banner>
 
-        <form name="form" id="password-form" @submit.prevent="changePassword()">
-          <div class="form-group">
-            <label class="form-control-label" for="currentPassword" v-text="t$('global.form[\'currentpassword.label\']')"></label>
-            <input
-              type="password"
-              class="form-control"
-              id="currentPassword"
-              name="currentPassword"
-              :class="{ valid: !v$.resetPassword.currentPassword.$invalid, invalid: v$.resetPassword.currentPassword.$invalid }"
-              :placeholder="t$('global.form[\'currentpassword.placeholder\']')"
-              v-model="v$.resetPassword.currentPassword.$model"
-              required
-              data-cy="currentPassword"
-            />
-            <div v-if="v$.resetPassword.currentPassword.$anyDirty && v$.resetPassword.currentPassword.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetPassword.currentPassword.required"
-                v-text="t$('global.messages.validate.newpassword.required')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="newPassword" v-text="t$('global.form[\'newpassword.label\']')"></label>
-            <input
-              type="password"
-              class="form-control"
-              id="newPassword"
-              name="newPassword"
-              :placeholder="t$('global.form[\'newpassword.placeholder\']')"
-              :class="{ valid: !v$.resetPassword.newPassword.$invalid, invalid: v$.resetPassword.newPassword.$invalid }"
-              v-model="v$.resetPassword.newPassword.$model"
-              minlength="4"
-              maxlength="50"
-              required
-              data-cy="newPassword"
-            />
-            <div v-if="v$.resetPassword.newPassword.$anyDirty && v$.resetPassword.newPassword.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetPassword.newPassword.required"
-                v-text="t$('global.messages.validate.newpassword.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetPassword.newPassword.minLength"
-                v-text="t$('global.messages.validate.newpassword.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetPassword.newPassword.maxLength"
-                v-text="t$('global.messages.validate.newpassword.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="confirmPassword" v-text="t$('global.form[\'confirmpassword.label\']')"></label>
-            <input
-              type="password"
-              class="form-control"
-              id="confirmPassword"
-              name="confirmPassword"
-              :class="{ valid: !v$.resetPassword.confirmPassword.$invalid, invalid: v$.resetPassword.confirmPassword.$invalid }"
-              :placeholder="t$('global.form[\'confirmpassword.placeholder\']')"
-              v-model="v$.resetPassword.confirmPassword.$model"
-              minlength="4"
-              maxlength="50"
-              required
-              data-cy="confirmPassword"
-            />
-            <div v-if="v$.resetPassword.confirmPassword.$anyDirty && v$.resetPassword.confirmPassword.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.resetPassword.confirmPassword.sameAsPassword"
-                v-text="t$('global.messages.error.dontmatch')"
-              ></small>
-            </div>
-          </div>
+        <q-banner v-if="doNotMatch" class="bg-warning text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="warning" color="white" />
+          </template>
+          {{ t$('global.messages.error.dontmatch') }}
+        </q-banner>
 
-          <button
-            type="submit"
-            :disabled="v$.resetPassword.$invalid"
-            class="btn btn-primary"
-            v-text="t$('password.form.button')"
-            data-cy="submit"
-          ></button>
-        </form>
-      </div>
-    </div>
+        <q-form @submit.prevent="changePassword" class="q-gutter-md" id="password-form">
+          <q-input
+            v-model="resetPassword.currentPassword"
+            :type="showCurrent ? 'text' : 'password'"
+            :label="t$('global.form.currentPasswordLabel')"
+            :placeholder="t$('global.form.currentPasswordPlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="currentPassword"
+            :rules="[val => !!val || t$('validate.newpassword.required')]"
+          >
+            <template #prepend>
+              <q-icon name="lock" />
+            </template>
+            <template #append>
+              <q-icon :name="showCurrent ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showCurrent = !showCurrent" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="resetPassword.newPassword"
+            :type="showNew ? 'text' : 'password'"
+            :label="t$('global.form.newPasswordLabel')"
+            :placeholder="t$('global.form.newPasswordPlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="newPassword"
+            :rules="[
+              val => !!val || t$('validate.newpassword.required'),
+              val => (val && val.length >= 4) || t$('validate.newpassword.minlength'),
+              val => (val && val.length <= 50) || t$('validate.newpassword.maxlength'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="lock_outline" />
+            </template>
+            <template #append>
+              <q-icon :name="showNew ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showNew = !showNew" />
+            </template>
+          </q-input>
+
+          <q-linear-progress
+            v-if="resetPassword.newPassword"
+            :value="passwordStrength"
+            :color="passwordStrengthColor"
+            class="q-mt-none"
+            style="margin-top: -12px !important"
+            rounded
+          />
+
+          <q-input
+            v-model="resetPassword.confirmPassword"
+            :type="showConfirm ? 'text' : 'password'"
+            :label="t$('global.form.confirmPasswordLabel')"
+            :placeholder="t$('global.form.confirmPasswordPlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="confirmPassword"
+            :rules="[
+              val => !!val || t$('validate.confirmpassword.required'),
+              val => val === resetPassword.newPassword || t$('global.messages.error.dontmatch'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="lock_outline" />
+            </template>
+            <template #append>
+              <q-icon :name="showConfirm ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showConfirm = !showConfirm" />
+            </template>
+          </q-input>
+
+          <q-btn type="submit" color="primary" unelevated class="full-width" :label="t$('password.form.button')" data-cy="submit" />
+        </q-form>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
-<script lang="ts" src="./change-password.component.ts"></script>
+<script setup lang="ts">
+import { ref, computed, inject, type ComputedRef } from 'vue';
+import { useI18n } from 'vue-i18n';
+import axios from 'axios';
+
+const { t: t$ } = useI18n();
+const username = inject<ComputedRef<string>>('currentUsername');
+
+const success = ref(false);
+const error = ref(false);
+const doNotMatch = ref(false);
+const showCurrent = ref(false);
+const showNew = ref(false);
+const showConfirm = ref(false);
+
+const resetPassword = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+});
+
+const passwordStrength = computed(() => {
+  const pw = resetPassword.value.newPassword;
+  if (!pw) return 0;
+  let score = 0;
+  if (pw.length >= 4) score += 0.2;
+  if (pw.length >= 8) score += 0.2;
+  if (/[A-Z]/.test(pw)) score += 0.2;
+  if (/[0-9]/.test(pw)) score += 0.2;
+  if (/[^A-Za-z0-9]/.test(pw)) score += 0.2;
+  return score;
+});
+
+const passwordStrengthColor = computed(() => {
+  const s = passwordStrength.value;
+  if (s <= 0.2) return 'negative';
+  if (s <= 0.4) return 'warning';
+  if (s <= 0.6) return 'info';
+  return 'positive';
+});
+
+const changePassword = async () => {
+  success.value = false;
+  error.value = false;
+  doNotMatch.value = false;
+
+  if (resetPassword.value.newPassword !== resetPassword.value.confirmPassword) {
+    doNotMatch.value = true;
+    return;
+  }
+
+  try {
+    await axios.post('api/account/change-password', {
+      currentPassword: resetPassword.value.currentPassword,
+      newPassword: resetPassword.value.newPassword,
+    });
+    success.value = true;
+    error.value = false;
+  } catch {
+    success.value = false;
+    error.value = true;
+  }
+};
+</script>

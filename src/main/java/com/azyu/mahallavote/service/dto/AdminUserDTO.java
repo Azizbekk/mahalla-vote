@@ -1,11 +1,11 @@
 package com.azyu.mahallavote.service.dto;
 
 import com.azyu.mahallavote.config.Constants;
+import com.azyu.mahallavote.domain.AppUser;
 import com.azyu.mahallavote.domain.Authority;
-import com.azyu.mahallavote.domain.User;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,11 +43,11 @@ public class AdminUserDTO implements Serializable {
 
     private String createdBy;
 
-    private Instant createdDate;
+    private LocalDateTime createdDate;
 
     private String lastModifiedBy;
 
-    private Instant lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 
     private Set<String> authorities;
 
@@ -55,7 +55,7 @@ public class AdminUserDTO implements Serializable {
         // Empty constructor needed for Jackson.
     }
 
-    public AdminUserDTO(User user) {
+    public AdminUserDTO(AppUser user) {
         this.id = user.getId();
         this.login = user.getLogin();
         this.firstName = user.getFirstName();
@@ -143,11 +143,11 @@ public class AdminUserDTO implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public Instant getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Instant createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -159,11 +159,11 @@ public class AdminUserDTO implements Serializable {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    public Instant getLastModifiedDate() {
+    public LocalDateTime getLastModifiedDate() {
         return lastModifiedDate;
     }
 
-    public void setLastModifiedDate(Instant lastModifiedDate) {
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 

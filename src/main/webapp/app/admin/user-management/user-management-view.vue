@@ -1,59 +1,138 @@
 <template>
-  <div class="row justify-content-center">
-    <div class="col-8">
-      <div v-if="user">
-        <h2 class="jh-entity-heading">
-          <span v-text="t$('userManagement.detail.title')"></span> [<strong>{{ user.login }}</strong
+  <div class="q-pa-md page-container">
+    <q-card v-if="user" flat bordered>
+      <q-card-section>
+        <div class="text-h5">
+          {{ t$('userManagement.detail.title') }} [<strong>{{ user.login }}</strong
           >]
-        </h2>
-        <dl class="row jh-entity-details">
-          <dt><span v-text="t$('userManagement.login')"></span></dt>
-          <dd>
-            <span>{{ user.login }}</span>
-            <b-badge variant="success" v-if="user.activated" v-text="t$('userManagement.activated')"></b-badge>
-            <b-badge variant="danger" v-if="!user.activated" v-text="t$('userManagement.deactivated')"></b-badge>
-          </dd>
-          <dt><span v-text="t$('userManagement.firstName')"></span></dt>
-          <dd>{{ user.firstName }}</dd>
-          <dt><span v-text="t$('userManagement.lastName')"></span></dt>
-          <dd>{{ user.lastName }}</dd>
-          <dt><span v-text="t$('userManagement.email')"></span></dt>
-          <dd>{{ user.email }}</dd>
-          <dt><span v-text="t$('userManagement.langKey')"></span></dt>
-          <dd>{{ user.langKey }}</dd>
-          <dt><span v-text="t$('userManagement.createdBy')"></span></dt>
-          <dd>{{ user.createdBy }}</dd>
-          <dt><span v-text="t$('userManagement.createdDate')"></span></dt>
-          <dd>
-            <span v-if="user.createdDate">
-              {{ formatDate(user.createdDate) }}
-            </span>
-          </dd>
-          <dt><span v-text="t$('userManagement.lastModifiedBy')"></span></dt>
-          <dd>{{ user.lastModifiedBy }}</dd>
-          <dt><span v-text="t$('userManagement.lastModifiedDate')"></span></dt>
-          <dd>
-            <span v-if="user.lastModifiedDate">
-              {{ formatDate(user.lastModifiedDate) }}
-            </span>
-          </dd>
-          <dt><span v-text="t$('userManagement.profiles')"></span></dt>
-          <dd>
-            <ul class="list-unstyled">
-              <li v-for="authority of user.authorities" :key="authority">
-                <b-badge variant="info">{{ authority }}</b-badge>
-              </li>
-            </ul>
-          </dd>
-        </dl>
-        <router-link custom v-slot="{ navigate }" :to="{ name: 'JhiUser' }">
-          <button @click="navigate" class="btn btn-info">
-            <font-awesome-icon icon="arrow-left"></font-awesome-icon>&nbsp;<span v-text="t$('entity.action.back')"></span>
-          </button>
-        </router-link>
-      </div>
-    </div>
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section>
+        <q-list separator>
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.login') }}
+            </q-item-section>
+            <q-item-section>
+              {{ user.login }}
+              <q-badge
+                v-if="user.activated"
+                color="positive"
+                :label="t$('userManagement.activated')"
+                class="q-ml-sm"
+                style="display: inline"
+              />
+              <q-badge v-else color="negative" :label="t$('userManagement.deactivated')" class="q-ml-sm" style="display: inline" />
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.firstName') }}
+            </q-item-section>
+            <q-item-section>{{ user.firstName }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.lastName') }}
+            </q-item-section>
+            <q-item-section>{{ user.lastName }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.email') }}
+            </q-item-section>
+            <q-item-section>{{ user.email }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.langKey') }}
+            </q-item-section>
+            <q-item-section>{{ user.langKey }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.createdBy') }}
+            </q-item-section>
+            <q-item-section>{{ user.createdBy }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.createdDate') }}
+            </q-item-section>
+            <q-item-section>
+              <span v-if="user.createdDate">{{ formatDate(user.createdDate) }}</span>
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.lastModifiedBy') }}
+            </q-item-section>
+            <q-item-section>{{ user.lastModifiedBy }}</q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.lastModifiedDate') }}
+            </q-item-section>
+            <q-item-section>
+              <span v-if="user.lastModifiedDate">{{ formatDate(user.lastModifiedDate) }}</span>
+            </q-item-section>
+          </q-item>
+
+          <q-item>
+            <q-item-section side class="text-weight-bold" style="min-width: 180px">
+              {{ t$('userManagement.profiles') }}
+            </q-item-section>
+            <q-item-section>
+              <div>
+                <q-badge v-for="authority of user.authorities" :key="authority" color="info" :label="authority" class="q-mr-xs q-mb-xs" />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+
+      <q-card-actions>
+        <q-btn color="info" icon="arrow_back" :label="t$('entity.action.back')" :to="{ name: 'UserManagement' }" />
+      </q-card-actions>
+    </q-card>
   </div>
 </template>
 
-<script lang="ts" src="./user-management-view.component.ts"></script>
+<script setup lang="ts">
+import { ref, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import UserManagementService from './user-management.service';
+import { useDateFormat } from '@/shared/composables';
+import { useAlertService } from '@/shared/alert/alert.service';
+
+const { t: t$ } = useI18n();
+const route = useRoute();
+const { formatDateLong: formatDate } = useDateFormat();
+const alertService = inject('alertService', () => useAlertService(), true);
+const userManagementService = inject('userManagementService', () => new UserManagementService(), true);
+
+const user = ref<any>(null);
+
+async function loadUser(userId: string) {
+  try {
+    const response = await userManagementService.get(userId);
+    user.value = response.data;
+  } catch (error: any) {
+    alertService.showHttpError(error.response);
+  }
+}
+
+loadUser(route.params?.userId as string);
+</script>

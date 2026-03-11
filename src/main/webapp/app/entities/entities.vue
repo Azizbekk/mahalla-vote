@@ -1,5 +1,10 @@
 <template>
-  <router-view></router-view>
+  <router-view />
 </template>
 
-<script lang="ts" src="./entities.component.ts"></script>
+<script lang="ts" setup>
+import { provide } from 'vue';
+import UserService from '@/entities/user/user.service';
+
+provide('userService', () => new UserService());
+</script>

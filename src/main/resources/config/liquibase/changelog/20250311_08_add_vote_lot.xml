@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250311-08-1" author="system">
+        <createSequence sequenceName="seq_app_vote_lot" startValue="1050" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="20250311-08-2" author="system">
+        <createTable tableName="app_vote_lot">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open_budget_url" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_vote_count" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_vote_count" type="integer" defaultValueNumeric="0"/>
+            <column name="status" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_modified_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

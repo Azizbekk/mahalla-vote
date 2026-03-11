@@ -1,138 +1,151 @@
 <template>
-  <div>
-    <div class="row justify-content-center">
-      <div class="col-md-8 toastify-container">
-        <h2 v-if="username" id="settings-title">
+  <div class="auth-page">
+    <q-card class="auth-card" flat bordered style="max-width: 600px; margin: 0 auto">
+      <q-card-section class="text-center q-pt-lg">
+        <q-icon name="settings" size="48px" color="primary" />
+        <div v-if="username" class="text-h5 q-mt-sm text-weight-bold" id="settings-title">
           <span v-html="t$('settings.title', { username })"></span>
-        </h2>
+        </div>
+      </q-card-section>
 
-        <div class="alert alert-success" role="alert" v-if="success" v-html="t$('settings.messages.success')"></div>
+      <q-card-section>
+        <q-banner v-if="success" class="bg-positive text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="check_circle" color="white" />
+          </template>
+          <span v-html="t$('settings.messages.success')"></span>
+        </q-banner>
 
-        <div class="alert alert-danger" role="alert" v-if="errorEmailExists" v-html="t$('register.messages.error.emailexists')"></div>
+        <q-banner v-if="errorEmailExists" class="bg-negative text-white q-mb-md" rounded>
+          <template #avatar>
+            <q-icon name="error" color="white" />
+          </template>
+          <span v-html="t$('register.messages.error.emailexists')"></span>
+        </q-banner>
 
-        <form name="form" id="settings-form" @submit.prevent="save()" v-if="settingsAccount" novalidate>
-          <div class="form-group">
-            <label class="form-control-label" for="firstName" v-text="t$('settings.form.firstname')"></label>
-            <input
-              type="text"
-              class="form-control"
-              id="firstName"
-              name="firstName"
-              :placeholder="t$('settings.form[\'firstname.placeholder\']')"
-              :class="{ valid: !v$.settingsAccount.firstName.$invalid, invalid: v$.settingsAccount.firstName.$invalid }"
-              v-model="v$.settingsAccount.firstName.$model"
-              minlength="1"
-              maxlength="50"
-              required
-              data-cy="firstname"
-            />
-            <div v-if="v$.settingsAccount.firstName.$anyDirty && v$.settingsAccount.firstName.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.firstName.required"
-                v-text="t$('settings.messages.validate.firstname.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.firstName.minLength"
-                v-text="t$('settings.messages.validate.firstname.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.firstName.maxLength"
-                v-text="t$('settings.messages.validate.firstname.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="lastName" v-text="t$('settings.form.lastname')"></label>
-            <input
-              type="text"
-              class="form-control"
-              id="lastName"
-              name="lastName"
-              :placeholder="t$('settings.form[\'lastname.placeholder\']')"
-              :class="{ valid: !v$.settingsAccount.lastName.$invalid, invalid: v$.settingsAccount.lastName.$invalid }"
-              v-model="v$.settingsAccount.lastName.$model"
-              minlength="1"
-              maxlength="50"
-              required
-              data-cy="lastname"
-            />
-            <div v-if="v$.settingsAccount.lastName.$anyDirty && v$.settingsAccount.lastName.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.lastName.required"
-                v-text="t$('settings.messages.validate.lastname.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.lastName.minLength"
-                v-text="t$('settings.messages.validate.lastname.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.lastName.maxLength"
-                v-text="t$('settings.messages.validate.lastname.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-control-label" for="email" v-text="t$('global.form[\'email.label\']')"></label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              :placeholder="t$('global.form[\'email.placeholder\']')"
-              :class="{ valid: !v$.settingsAccount.email.$invalid, invalid: v$.settingsAccount.email.$invalid }"
-              v-model="v$.settingsAccount.email.$model"
-              minlength="5"
-              maxlength="254"
-              email
-              required
-              data-cy="email"
-            />
-            <div v-if="v$.settingsAccount.email.$anyDirty && v$.settingsAccount.email.$invalid">
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.email.required"
-                v-text="t$('global.messages.validate.email.required')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.email.email"
-                v-text="t$('global.messages.validate.email.invalid')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.email.minLength"
-                v-text="t$('global.messages.validate.email.minlength')"
-              ></small>
-              <small
-                class="form-text text-danger"
-                v-if="!v$.settingsAccount.email.maxLength"
-                v-text="t$('global.messages.validate.email.maxlength')"
-              ></small>
-            </div>
-          </div>
-          <div class="form-group" v-if="languages && Object.keys(languages).length > 1">
-            <label for="langKey" v-text="t$('settings.form.language')"></label>
-            <select class="form-control" id="langKey" name="langKey" v-model="settingsAccount.langKey" data-cy="langKey">
-              <option v-for="(language, key) in languages" :value="key" :key="`lang-${key}`">{{ language.name }}</option>
-            </select>
-          </div>
-          <button
-            type="submit"
-            :disabled="v$.settingsAccount.$invalid"
-            class="btn btn-primary"
-            v-text="t$('settings.form.button')"
-            data-cy="submit"
-          ></button>
-        </form>
-      </div>
-    </div>
+        <q-form v-if="settingsAccount" @submit.prevent="save" class="q-gutter-md" id="settings-form">
+          <q-input
+            v-model="settingsAccount.firstName"
+            :label="t$('settings.form.firstname')"
+            :placeholder="t$('settings.form.firstnamePlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="firstname"
+            :rules="[
+              val => !!val || t$('settings.messages.validate.firstname.required'),
+              val => (val && val.length >= 1) || t$('settings.messages.validate.firstname.minlength'),
+              val => (val && val.length <= 50) || t$('settings.messages.validate.firstname.maxlength'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="person" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="settingsAccount.lastName"
+            :label="t$('settings.form.lastname')"
+            :placeholder="t$('settings.form.lastnamePlaceholder')"
+            outlined
+            dense
+            lazy-rules
+            data-cy="lastname"
+            :rules="[
+              val => !!val || t$('settings.messages.validate.lastname.required'),
+              val => (val && val.length >= 1) || t$('settings.messages.validate.lastname.minlength'),
+              val => (val && val.length <= 50) || t$('settings.messages.validate.lastname.maxlength'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="badge" />
+            </template>
+          </q-input>
+
+          <q-input
+            v-model="settingsAccount.email"
+            :label="t$('global.form.emailLabel')"
+            :placeholder="t$('global.form.emailPlaceholder')"
+            type="email"
+            outlined
+            dense
+            lazy-rules
+            data-cy="email"
+            :rules="[
+              val => !!val || t$('validate.email.required'),
+              val => (val && val.length >= 5) || t$('validate.email.minlength'),
+              val => (val && val.length <= 254) || t$('validate.email.maxlength'),
+              val => /.+@.+\..+/.test(val) || t$('validate.email.invalid'),
+            ]"
+          >
+            <template #prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
+
+          <q-select
+            v-if="languageOptions.length > 1"
+            v-model="settingsAccount.langKey"
+            :options="languageOptions"
+            :label="t$('settings.form.language')"
+            outlined
+            dense
+            emit-value
+            map-options
+            data-cy="langKey"
+          >
+            <template #prepend>
+              <q-icon name="language" />
+            </template>
+          </q-select>
+
+          <q-btn type="submit" color="primary" unelevated class="full-width" :label="t$('settings.form.button')" data-cy="submit" />
+        </q-form>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
-<script lang="ts" src="./settings.component.ts"></script>
+<script setup lang="ts">
+import { computed, inject, type ComputedRef } from 'vue';
+import { useI18n } from 'vue-i18n';
+import axios from 'axios';
+import { ref } from 'vue';
+import languages from '@/shared/config/languages';
+import { EMAIL_ALREADY_USED_TYPE } from '@/constants';
+import { useStore } from '@/store';
+
+const { t: t$ } = useI18n();
+const store = useStore();
+
+const success = ref(false);
+const error = ref(false);
+const errorEmailExists = ref(false);
+
+const settingsAccount = computed(() => store.account);
+const username = inject<ComputedRef<string>>('currentUsername', () => computed(() => store.account?.login), true);
+
+const langs = languages();
+const languageOptions = Object.entries(langs).map(([key, val]: [string, any]) => ({
+  value: key,
+  label: val.name,
+}));
+
+const save = async () => {
+  error.value = false;
+  errorEmailExists.value = false;
+  try {
+    await axios.post('api/account', settingsAccount.value);
+    success.value = true;
+    error.value = false;
+    errorEmailExists.value = false;
+  } catch (ex: any) {
+    success.value = false;
+    if (ex.response?.status === 400 && ex.response?.data?.type === EMAIL_ALREADY_USED_TYPE) {
+      errorEmailExists.value = true;
+    } else {
+      error.value = true;
+    }
+  }
+};
+</script>

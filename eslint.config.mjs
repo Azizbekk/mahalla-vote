@@ -5,7 +5,6 @@ import prettier from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import js from '@eslint/js';
 import vue from 'eslint-plugin-vue';
-// jhipster-needle-eslint-add-import - JHipster will add additional import here
 
 export default tseslint.config(
   {
@@ -51,17 +50,10 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/consistent-type-imports': 'error',
-      'vue/no-v-text-v-html-on-component': ['error', { allow: ['router-link', 'b-alert', 'b-badge', 'b-button', 'b-link'] }],
+      'vue/no-v-text-v-html-on-component': ['error', { allow: ['router-link'] }],
       'vue/no-reserved-component-names': 'off',
       'vue/attributes-order': 'off',
     },
   },
-  {
-    files: ['src/main/webapp/**/*.spec.ts'],
-    rules: {
-      '@typescript-eslint/no-empty-function': 'off',
-    },
-  },
-  // jhipster-needle-eslint-add-config - JHipster will add additional config here
   prettier,
 );

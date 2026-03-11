@@ -12,7 +12,12 @@
     <property name="timeType" value="time(6)" dbms="postgresql"/>
 
     <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
-    <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
-    <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
-    <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
+    <include file="config/liquibase/changelog/20250311_01_add_telegram_user.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_02_add_amount_config.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_03_add_vote.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_04_add_referral.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_05_add_captcha.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_06_add_project_setting.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_07_add_i18n_message.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250311_08_add_vote_lot.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
