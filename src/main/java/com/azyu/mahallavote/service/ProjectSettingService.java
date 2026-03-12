@@ -7,7 +7,9 @@ import com.azyu.mahallavote.service.dto.ProjectSettingDTO;
 import com.azyu.mahallavote.service.mapper.ProjectSettingMapper;
 import com.azyu.mahallavote.web.rest.errors.ResourceNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class ProjectSettingService {
     private final ProjectSettingRepository projectSettingRepository;
     private final ProjectSettingMapper projectSettingMapper;
 
+    // In-memory cache: settingKey → settingValue
+    private final Map<String, Optional<String>> cache = new ConcurrentHashMap<>();
+
     public ProjectSettingService(ProjectSettingRepository projectSettingRepository, ProjectSettingMapper projectSettingMapper) {
         this.projectSettingRepository = projectSettingRepository;
         this.projectSettingMapper = projectSettingMapper;
@@ -31,6 +36,7 @@ public class ProjectSettingService {
         LOG.debug("Request to save ProjectSetting : {}", dto);
         ProjectSetting entity = projectSettingMapper.toEntity(dto);
         entity = projectSettingRepository.save(entity);
+        cache.clear();
         return projectSettingMapper.toDto(entity);
     }
 
@@ -41,12 +47,13 @@ public class ProjectSettingService {
             .orElseThrow(() -> new ResourceNotFoundException("ProjectSetting", dto.getId()));
         projectSettingMapper.partialUpdate(entity, dto);
         entity = projectSettingRepository.save(entity);
+        cache.clear();
         return projectSettingMapper.toDto(entity);
     }
 
     public Optional<ProjectSettingDTO> partialUpdate(ProjectSettingDTO dto) {
         LOG.debug("Request to partially update ProjectSetting : {}", dto);
-        return projectSettingRepository
+        Optional<ProjectSettingDTO> result = projectSettingRepository
             .findById(dto.getId())
             .map(existing -> {
                 projectSettingMapper.partialUpdate(existing, dto);
@@ -54,6 +61,8 @@ public class ProjectSettingService {
             })
             .map(projectSettingRepository::save)
             .map(projectSettingMapper::toDto);
+        cache.clear();
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -71,15 +80,16 @@ public class ProjectSettingService {
     public void delete(Long id) {
         LOG.debug("Request to delete ProjectSetting : {}", id);
         projectSettingRepository.deleteById(id);
+        cache.clear();
     }
 
     // --- Helper methods for bot and internal usage ---
 
     @Transactional(readOnly = true)
     public Optional<String> getActiveValue(String settingKey) {
-        return projectSettingRepository
-            .findBySettingKeyAndStatus(settingKey, ProjectSettingStatus.ACTIVE)
-            .map(ProjectSetting::getSettingValue);
+        return cache.computeIfAbsent(settingKey, key ->
+            projectSettingRepository.findBySettingKeyAndStatus(key, ProjectSettingStatus.ACTIVE).map(ProjectSetting::getSettingValue)
+        );
     }
 
     @Transactional(readOnly = true)

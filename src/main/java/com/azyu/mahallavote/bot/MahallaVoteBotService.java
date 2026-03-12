@@ -89,6 +89,10 @@ public class MahallaVoteBotService extends TelegramLongPollingBot {
             if (user.getState() == TelegramUserState.AWAITING_PHONE) {
                 return voteCommandHandler.handlePhoneInput(message, this::executeSafe);
             }
+
+            if (user.getState() == TelegramUserState.AWAITING_OTP) {
+                return voteCommandHandler.handleOtpInput(message);
+            }
         }
 
         // Handle menu buttons

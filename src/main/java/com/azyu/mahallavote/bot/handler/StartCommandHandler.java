@@ -3,6 +3,7 @@ package com.azyu.mahallavote.bot.handler;
 import com.azyu.mahallavote.bot.BotConstants;
 import com.azyu.mahallavote.bot.KeyboardHelper;
 import com.azyu.mahallavote.domain.TelegramUser;
+import com.azyu.mahallavote.domain.enumeration.TelegramUserState;
 import com.azyu.mahallavote.service.ReferralService;
 import com.azyu.mahallavote.service.TelegramUserService;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class StartCommandHandler {
     public SendMessage handle(Message message) {
         Long chatId = message.getChatId();
         TelegramUser user = telegramUserService.registerUserIfNotExists(message.getFrom(), chatId);
+        telegramUserService.updateState(chatId, TelegramUserState.HOME);
 
         String text = message.getText();
         if (text != null && text.contains(BotConstants.REF_PREFIX)) {

@@ -11,6 +11,7 @@ import com.azyu.mahallavote.service.TelegramUserService;
 import com.azyu.mahallavote.service.VoteLotService;
 import com.azyu.mahallavote.service.VoteService;
 import com.azyu.mahallavote.service.dto.CaptchaResult;
+import com.azyu.mahallavote.service.dto.SubmitResult;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -151,39 +152,112 @@ public class VoteCommandHandler {
         messageSender.accept(waitMessage);
 
         // OpenBudget captcha olish va yechish
-        CaptchaResult captchaResult = openBudgetService.fetchAndSolveCaptcha(lot.getOpenBudgetUrl());
+        CaptchaResult captchaResult = openBudgetService.fetchAndSolveCaptcha(chatId, lot.getOpenBudgetUrl());
 
         if (captchaResult == null) {
             log.error("Captcha solving failed for lot: {} chatId: {}", lot.getId(), chatId);
             telegramUserService.updateState(chatId, TelegramUserState.HOME);
-            SendMessage response = new SendMessage();
-            response.setChatId(chatId.toString());
-            response.setText("❌ Captcha tekshirishda xatolik yuz berdi. Qaytadan urinib ko'ring.");
-            response.setReplyMarkup(KeyboardHelper.mainMenu());
-            return response;
+            SendMessage errorResponse = new SendMessage();
+            errorResponse.setChatId(chatId.toString());
+            errorResponse.setText("❌ Captcha tekshirishda xatolik yuz berdi.\nQaytadan urinib ko'ring.");
+            errorResponse.setReplyMarkup(KeyboardHelper.mainMenu());
+            return errorResponse;
         }
 
         log.info("Captcha solved for chatId: {}, result: {}", chatId, captchaResult);
 
-        // TODO: OpenBudget ga ovoz yuborish (captcha + telefon raqam)
-        // TODO: OTP kutish va tasdiqlash
+        // OpenBudget ga captcha + telefon yuborish va SMS so'rash
+        SubmitResult lastResult = openBudgetService.submitVoteAndRequestSms(chatId, normalizedPhone, captchaResult.getCoordinatesJson());
 
+        if (lastResult.getStatus() == SubmitResult.Status.ERROR) {
+            telegramUserService.updateState(chatId, TelegramUserState.HOME);
+            SendMessage response = new SendMessage();
+            response.setChatId(chatId.toString());
+            response.setText("❌ " + (lastResult != null ? lastResult.getMessage() : "Xatolik yuz berdi.") + "\nQaytadan urinib ko'ring.");
+            response.setReplyMarkup(KeyboardHelper.mainMenu());
+            return response;
+        }
+
+        // Ovoz allaqachon yuborilgan — SMS talab qilinmadi, faqat xabar ko'rsatish
+        if (lastResult.getStatus() == SubmitResult.Status.ACCEPTED) {
+            telegramUserService.updateState(chatId, TelegramUserState.HOME);
+
+            SendMessage response = new SendMessage();
+            response.setChatId(chatId.toString());
+            response.setText("⏳ " + lastResult.getMessage());
+            response.setReplyMarkup(KeyboardHelper.mainMenu());
+            return response;
+        }
+
+        // SMS yuborildi — OTP kutish holatiga o'tish
+        telegramUserService.updateState(chatId, TelegramUserState.AWAITING_OTP);
+
+        SendMessage response = new SendMessage();
+        response.setChatId(chatId.toString());
+        response.setText(
+            "📩 SMS kod yuborildi!\n\n" + "📱 Raqam: " + normalizedPhone + "\n\n" + "SMS orqali kelgan 6 xonali kodni yuboring:"
+        );
+        return response;
+    }
+
+    public SendMessage handleOtpInput(Message message) {
+        Long chatId = message.getChatId();
+        String text = message.getText();
+
+        if (text == null || !text.matches("\\d{6}")) {
+            SendMessage response = new SendMessage();
+            response.setChatId(chatId.toString());
+            response.setText("❌ SMS kod 6 ta raqamdan iborat bo'lishi kerak. Qaytadan yuboring:");
+            return response;
+        }
+
+        Optional<TelegramUser> userOpt = telegramUserService.findByChatId(chatId);
+        if (userOpt.isEmpty()) {
+            SendMessage response = new SendMessage();
+            response.setChatId(chatId.toString());
+            response.setText("❌ Xatolik yuz berdi. /start buyrug'ini yuboring.");
+            return response;
+        }
+
+        TelegramUser user = userOpt.get();
+
+        SubmitResult verifyResult = openBudgetService.verifyOtp(chatId, text);
+
+        if (verifyResult.getStatus() == SubmitResult.Status.ERROR) {
+            String verifyError = verifyResult.getMessage();
+            log.warn("OTP verification failed for chatId: {}, error: {}", chatId, verifyError);
+
+            openBudgetService.clearSession(chatId);
+            telegramUserService.updateState(chatId, TelegramUserState.HOME);
+            SendMessage response = new SendMessage();
+            response.setChatId(chatId.toString());
+            response.setText("❌ " + verifyError + "\n\nQaytadan ovoz bering.");
+            response.setReplyMarkup(KeyboardHelper.mainMenu());
+            return response;
+        }
+
+        // OTP tasdiqlandi — ovozni ro'yxatga olish
+        String normalizedPhone = user.getPhoneNumber();
         Vote vote = voteService.createVote(user, normalizedPhone);
-        voteLotService.incrementVoteCount(lot.getId());
+
+        Optional<VoteLot> activeLot = voteLotService.findActiveLot();
+        activeLot.ifPresent(lot -> voteLotService.incrementVoteCount(lot.getId()));
+
         referralService.markAsVoted(user.getId());
         telegramUserService.updateState(chatId, TelegramUserState.HOME);
 
         SendMessage response = new SendMessage();
         response.setChatId(chatId.toString());
         response.setText(
-            String.format(
-                "✅ Ovozingiz qabul qilindi!\n\n" +
-                "\uD83D\uDCDE Raqam: %s\n" +
-                "\uD83D\uDCB0 Mukofot: %d so'm\n\n" +
-                "⏳ Tez orada tasdiqlangach, hisobingizga tushadi.",
-                normalizedPhone,
-                vote.getAmount()
-            )
+            "✅ " +
+            verifyResult.getMessage() +
+            "\n\n" +
+            "\uD83D\uDCDE Raqam: " +
+            normalizedPhone +
+            "\n" +
+            "\uD83D\uDCB0 Mukofot: " +
+            vote.getAmount() +
+            " so'm"
         );
         response.setReplyMarkup(KeyboardHelper.mainMenu());
         return response;

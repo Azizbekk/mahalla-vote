@@ -38,6 +38,9 @@ public class AntiCaptchaService {
             ObjectNode task = objectMapper.createObjectNode();
             task.put("type", "ImageToTextTask");
             task.put("body", base64Image);
+            task.put("numeric", 2);
+            task.put("minLength", 4);
+            task.put("maxLength", 4);
 
             int taskId = createTask(task);
             return pollTextResult(taskId);
@@ -68,9 +71,12 @@ public class AntiCaptchaService {
         }
     }
 
+    private String cachedApiKey;
+
     private int createTask(ObjectNode task) throws Exception {
+        cachedApiKey = getApiKey();
         ObjectNode request = objectMapper.createObjectNode();
-        request.put("clientKey", getApiKey());
+        request.put("clientKey", cachedApiKey);
         request.set("task", task);
 
         HttpHeaders headers = new HttpHeaders();
@@ -88,8 +94,9 @@ public class AntiCaptchaService {
     }
 
     private String pollTextResult(int taskId) throws Exception {
-        for (int i = 0; i < 30; i++) {
-            Thread.sleep(3000);
+        Thread.sleep(2000); // OCR avtomatik — tez tayyor bo'ladi
+        for (int i = 0; i < 4; i++) { // max: 2s + 4×2s = 10s
+            Thread.sleep(2000);
             JsonNode result = getTaskResult(taskId);
             String status = result.get("status").asText();
             if ("ready".equals(status)) {
@@ -101,8 +108,8 @@ public class AntiCaptchaService {
     }
 
     private String pollCoordinatesResult(int taskId) throws Exception {
-        for (int i = 0; i < 30; i++) {
-            Thread.sleep(3000);
+        Thread.sleep(3000); // odam yechadi — ko'proq vaqt kerak
+        for (int i = 0; i < 6; i++) { // max: 3s + 6×2s = 15s
             JsonNode result = getTaskResult(taskId);
             String status = result.get("status").asText();
             if ("ready".equals(status)) {
@@ -116,7 +123,7 @@ public class AntiCaptchaService {
 
     private JsonNode getTaskResult(int taskId) throws Exception {
         ObjectNode request = objectMapper.createObjectNode();
-        request.put("clientKey", getApiKey());
+        request.put("clientKey", cachedApiKey);
         request.put("taskId", taskId);
 
         HttpHeaders headers = new HttpHeaders();

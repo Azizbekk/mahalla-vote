@@ -47,32 +47,50 @@ public class BalanceCommandHandler {
 
         TelegramUser user = userOpt.get();
 
-        // Vote rewards
+        // Vote rewards — statuslar bo'yicha
         List<Vote> votes = voteRepository.findByVoterId(user.getId());
-        long voteEarnings = votes
+
+        long pendingVoteEarnings = votes.stream().filter(v -> v.getStatus() == VoteStatus.PENDING).mapToLong(Vote::getAmount).sum();
+        long pendingVoteCount = votes.stream().filter(v -> v.getStatus() == VoteStatus.PENDING).count();
+
+        long confirmedVoteEarnings = votes
             .stream()
             .filter(v -> v.getStatus() == VoteStatus.VOTED || v.getStatus() == VoteStatus.PAID)
             .mapToLong(Vote::getAmount)
             .sum();
+        long confirmedVoteCount = votes.stream().filter(v -> v.getStatus() == VoteStatus.VOTED || v.getStatus() == VoteStatus.PAID).count();
 
         // Referral rewards
         long votedReferrals = referralRepository.countByReferrerIdAndStatus(user.getId(), ReferralStatus.VOTED);
         long paidReferrals = referralRepository.countByReferrerIdAndStatus(user.getId(), ReferralStatus.PAID);
+        long pendingReferrals = referralRepository.countByReferrerIdAndStatus(user.getId(), ReferralStatus.REGISTERED);
         long referralRewardPerVote = projectSettingService.getActiveValueAsLong("REFERRAL_VOTE_AMOUNT", 0L);
-        long referralEarnings = (votedReferrals + paidReferrals) * referralRewardPerVote;
+        long confirmedReferralEarnings = (votedReferrals + paidReferrals) * referralRewardPerVote;
+        long pendingReferralEarnings = pendingReferrals * referralRewardPerVote;
 
-        long totalBalance = voteEarnings + referralEarnings;
+        long confirmedTotal = confirmedVoteEarnings + confirmedReferralEarnings;
+        long pendingTotal = pendingVoteEarnings + pendingReferralEarnings;
 
         String text = String.format(
             "\uD83D\uDCB0 Sizning balansingiz\n\n" +
-            "\uD83D\uDDF3 Ovozlar: %d ta → %d so'm\n" +
-            "\uD83D\uDC65 Referallar: %d ta → %d so'm\n\n" +
-            "\uD83D\uDCB5 Jami: %d so'm",
-            votes.size(),
-            voteEarnings,
+            "✅ Tasdiqlangan:\n" +
+            "   \uD83D\uDDF3 Ovozlar: %d ta → %d so'm\n" +
+            "   \uD83D\uDC65 Referallar: %d ta → %d so'm\n\n" +
+            "⏳ Tasdiqlanishi kutilmoqda:\n" +
+            "   \uD83D\uDDF3 Ovozlar: %d ta → %d so'm\n" +
+            "   \uD83D\uDC65 Referallar: %d ta → %d so'm\n\n" +
+            "\uD83D\uDCB5 Jami tasdiqlangan: %d so'm\n" +
+            "⏳ Jami kutilmoqda: %d so'm",
+            confirmedVoteCount,
+            confirmedVoteEarnings,
             votedReferrals + paidReferrals,
-            referralEarnings,
-            totalBalance
+            confirmedReferralEarnings,
+            pendingVoteCount,
+            pendingVoteEarnings,
+            pendingReferrals,
+            pendingReferralEarnings,
+            confirmedTotal,
+            pendingTotal
         );
 
         SendMessage response = new SendMessage();
