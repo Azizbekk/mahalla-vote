@@ -94,8 +94,8 @@ public class AntiCaptchaService {
     }
 
     private String pollTextResult(int taskId) throws Exception {
-        Thread.sleep(2000); // OCR avtomatik — tez tayyor bo'ladi
-        for (int i = 0; i < 4; i++) { // max: 2s + 4×2s = 10s
+        // OCR avtomatik — tez tayyor bo'ladi
+        for (int i = 0; i < 4; i++) { // max: 4×2s = 8s
             Thread.sleep(2000);
             JsonNode result = getTaskResult(taskId);
             String status = result.get("status").asText();
@@ -110,6 +110,7 @@ public class AntiCaptchaService {
     private String pollCoordinatesResult(int taskId) throws Exception {
         Thread.sleep(3000); // odam yechadi — ko'proq vaqt kerak
         for (int i = 0; i < 6; i++) { // max: 3s + 6×2s = 15s
+            Thread.sleep(2000);
             JsonNode result = getTaskResult(taskId);
             String status = result.get("status").asText();
             if ("ready".equals(status)) {
